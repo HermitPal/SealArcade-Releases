@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seal Arcade Downloads</title>
+<style>
+	:root {
+		--backdrop: #0d1423;
+		--card: #1d2740;
+		--card-border: #33405f;
+		--text: #f2f5fa;
+		--muted: #8d99b3;
+		--accent: #2fd16b;
+		--accent-hover: #29b95e;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	body {
+		margin: 0;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 40px;
+		padding: 48px 20px;
+		background: linear-gradient(180deg, var(--backdrop), #05080f);
+		color: var(--text);
+		font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 2.4rem;
+		font-weight: 600;
+	}
+
+	.version {
+		margin-top: 8px;
+		color: var(--muted);
+		text-align: center;
+		min-height: 1.2em;
+	}
+
+	.cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 24px;
+		width: 100%;
+		max-width: 760px;
+	}
+
+	.card {
+		background: var(--card);
+		border: 2px solid var(--card-border);
+		border-radius: 12px;
+		padding: 28px;
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
+	}
+
+	.card h2 {
+		margin: 0;
+		font-size: 1.5rem;
+		font-weight: 600;
+	}
+
+	.download {
+		display: block;
+		padding: 18px;
+		border-radius: 10px;
+		background: var(--accent);
+		color: #06210f;
+		font-size: 1.15rem;
+		font-weight: 700;
+		text-align: center;
+		text-decoration: none;
+	}
+
+	.download:hover,
+	.download:focus-visible {
+		background: var(--accent-hover);
+	}
+
+	.other {
+		display: flex;
+		justify-content: center;
+		gap: 18px;
+	}
+
+	.other a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.other a:hover,
+	.other a:focus-visible {
+		color: var(--text);
+		text-decoration: underline;
+	}
+
+	footer a {
+		color: var(--muted);
+	}
+</style>
+</head>
+<body>
+<header>
+	<h1>Seal Arcade</h1>
+	<div class="version" id="version"></div>
+</header>
+
+<main class="cards">
+	<section class="card" data-product="SealPlayer">
+		<h2>Seal Player</h2>
+		<a class="download" href="#">Download</a>
+		<nav class="other"></nav>
+	</section>
+
+	<section class="card" data-product="SealServer">
+		<h2>Seal Server</h2>
+		<a class="download" href="#">Download</a>
+		<nav class="other"></nav>
+	</section>
+</main>
+
+<footer>
+	<a href="https://github.com/HermitPal/SealArcade-Releases/releases">All releases</a>
+</footer>
+
+<script>
+	const latestDownloadRoot = "https://github.com/HermitPal/SealArcade-Releases/releases/latest/download/";
+	const latestReleaseApi = "https://api.github.com/repos/HermitPal/SealArcade-Releases/releases/latest";
+
+	const platforms = [
+		{ name: "windows", label: "Windows" },
+		{ name: "mac", label: "macOS" },
+		{ name: "linux", label: "Linux" },
+	];
+
+	function detectPlatformName() {
+		const agentText = navigator.userAgent.toLowerCase();
+
+		if (agentText.includes("mac")) {
+			return "mac";
+		}
+		if (agentText.includes("linux") && !agentText.includes("android")) {
+			return "linux";
+		}
+
+		return "windows";
+	}
+
+	function buildDownloadLink(productName, platformName) {
+		return latestDownloadRoot + productName + "-" + platformName + ".zip";
+	}
+
+	function fillCard(card, detectedPlatform) {
+		const productName = card.dataset.product;
+		const mainLink = card.querySelector(".download");
+		const otherLinks = card.querySelector(".other");
+
+		mainLink.href = buildDownloadLink(productName, detectedPlatform.name);
+		mainLink.textContent = "Download for " + detectedPlatform.label;
+
+		for (const platform of platforms) {
+			if (platform.name === detectedPlatform.name) {
+				continue;
+			}
+
+			const link = document.createElement("a");
+			link.href = buildDownloadLink(productName, platform.name);
+			link.textContent = platform.label;
+			otherLinks.appendChild(link);
+		}
+	}
+
+	async function showLatestVersion() {
+		try {
+			const response = await fetch(latestReleaseApi);
+			if (!response.ok) {
+				return;
+			}
+
+			const release = await response.json();
+			document.getElementById("version").textContent = release.tag_name;
+		} catch (error) {
+			return;
+		}
+	}
+
+	const detectedPlatformName = detectPlatformName();
+	const detectedPlatform = platforms.find((platform) => platform.name === detectedPlatformName);
+
+	for (const card of document.querySelectorAll(".card")) {
+		fillCard(card, detectedPlatform);
+	}
+
+	showLatestVersion();
+</script>
+</body>
+</html>

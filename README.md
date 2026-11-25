@@ -1,6 +1,6 @@
 # Seal Arcade Releases
 
-Download the latest build from [Releases](https://github.com/HermitPal/SealArcade-Releases/releases/latest).
+Download from https://hermitpal.github.io/SealArcade-Releases/ or [Releases](https://github.com/HermitPal/SealArcade-Releases/releases/latest).
 
 | Download | What it is |
 | --- | --- |
